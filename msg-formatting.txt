@@ -1,0 +1,18 @@
+Starting balance: $%.2f\n
+Current balance: $%.2f\n
+\n
+Amount spent: $%.2f\n
+Percentage spent: %.2f%%\n
+\n
+Time remaining in the semester:\n
+%d days, %d hours, %d minutes, %d seconds\n
+(%d-%d:%d:%d)\n
+\n
+Recommended spending average per day, including holidays:\n
+\n
+$%.2f"
+Starting out with $%.2f and have spent $%.2f.\n" +
+"That is %.2f%% of your start balance.\n" +
+"There are %d days, %d hours, %d mins, and %d " +
+"seconds left,\nand you should spend $%.2f on average " +
+"per day, including holidays.\n",

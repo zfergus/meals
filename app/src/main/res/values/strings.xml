@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Meals</string>
+
+    <string name = "plan_prompt">Select your meal plan:</string>
+    <string-array name="plans_array">
+        <item>Freedom First [$1900]</item>
+        <item>Freedom Rings [$2200]</item>
+        <item>Other                </item>
+    </string-array>
+
+    <string name="init_balance_prompt">Initial Balance:</string>
+    <string name="init_balance_hint">Initial Balance</string>
+
+    <string name="current_balance_prompt">Current Balance:</string>
+    <string name="current_balance_hint">Current Balance</string>
+
+    <string name="end_date_prompt">Last Day of Plan:</string>
+    <string name="end_date_hint">Last Day of Plan</string>
+
+    <string name="submit_button">Calculate</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_display_message">
+        Amount to Spend Daily
+    </string>
+
+    <string name="hello_world">Hello world!</string>
+</resources>
