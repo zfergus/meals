@@ -1,4 +1,4 @@
 <menu
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.zfergus2.meals.DisplayMessageActivity">
+    tools:context=".DisplayMealsActivity">
 </menu>

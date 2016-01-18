@@ -24,6 +24,13 @@ public class Meals
 	 **/
 	//public static final long ENDTIME = 1450587600;
 	public static final Calendar END_DATE = new GregorianCalendar(2016, 04, 15);
+	public static final TimeZone EASTERN_TIMEZONE =
+		new SimpleTimeZone(-5 * 60 * 60 * 1000, "America/New_York",
+		Calendar.MARCH, 8, -Calendar.SUNDAY,
+		2 * 60 * 60 * 1000,
+		Calendar.NOVEMBER, 1, -Calendar.SUNDAY,
+		2 * 60 * 60 * 1000,
+		1 * 60 * 60 * 1000);
 
 	/**
 	 * Constant array of ints representing the initial balance of the available
@@ -104,7 +111,7 @@ public class Meals
 		/* Remaining seconds. */
 		int remainder = (int) (delta % (3600 * 24));
 		 /* Determine number of hours in the eastern time zone. */
-		int hours = ((remainder) / (3600)) - 1;
+		int hours = ((remainder) / (3600));
 		remainder %= (3600);
 		/* Determine number of mins. */
 		int mins = remainder / 60;
@@ -146,8 +153,7 @@ public class Meals
 	 */
 	public static long getTimeTill(Calendar endDate)
 	{
-		Calendar currentTime = new GregorianCalendar(
-			new SimpleTimeZone(5, "Eastern"));
+		Calendar currentTime = new GregorianCalendar(EASTERN_TIMEZONE);
 
 		long deltaTime = endDate.getTimeInMillis() -
 			currentTime.getTimeInMillis();

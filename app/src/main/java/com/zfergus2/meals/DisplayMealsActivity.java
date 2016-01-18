@@ -7,7 +7,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-public class DisplayMessageActivity extends AppCompatActivity
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+public class DisplayMealsActivity extends AppCompatActivity
 {
 
 	@Override
@@ -23,9 +26,18 @@ public class DisplayMessageActivity extends AppCompatActivity
 		float currentBalance =
 				intent.getFloatExtra(MainActivity.EXTRA_CURRENT_BALANCE, 0f);
 
+		Calendar cal = new GregorianCalendar(
+			intent.getIntExtra(MainActivity.EXTRA_END_DATE_YEAR,
+				Meals.END_DATE.get(Calendar.YEAR)),
+			intent.getIntExtra(MainActivity.EXTRA_END_DATE_MONTH,
+				Meals.END_DATE.get(Calendar.MONTH)),
+			intent.getIntExtra(MainActivity.EXTRA_END_DATE_DAY,
+				Meals.END_DATE.get(Calendar.DAY_OF_MONTH))
+		);
+		cal.setTimeZone(Meals.EASTERN_TIMEZONE);
+
         /* Calculate the average and create a message. */
-		String message = Meals.getMessage(initBalance, currentBalance,
-			Meals.END_DATE);
+		String message = Meals.getMessage(initBalance, currentBalance, cal);
 
         /* Create the text view. */
 		TextView textView = (TextView) (findViewById(R.id.message_view));
@@ -49,7 +61,7 @@ public class DisplayMessageActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		//noinspection SimplifiableIfStatement
-		if (id == R.id.action_settings)
+		if (id == R.id.reset_date_action)
 		{
 			return true;
 		}
