@@ -13,6 +13,22 @@ import java.util.*;
  */
 public class Meals
 {
+	public static class MealsData
+	{
+		public float startBalance, currentBalance;
+		public String timeRemaining;
+		public double dailyAverage;
+
+		public MealsData(float startBalance, float currentBalance,
+						 String timeRemaining, double dailyAverage)
+		{
+			this.startBalance = startBalance;
+			this.currentBalance = currentBalance;
+			this.timeRemaining = timeRemaining;
+			this.dailyAverage = dailyAverage;
+		}
+	}
+
 	/**
 	 * Static scanner that can be used through out the class to get input from
 	 * the stdin.
@@ -22,7 +38,6 @@ public class Meals
 	/**
 	 * Unix Time for the last time to use Freedom Funds for the semester.
 	 **/
-	//public static final long ENDTIME = 1450587600;
 	public static final Calendar END_DATE = new GregorianCalendar(2016, 04, 15);
 	public static final TimeZone EASTERN_TIMEZONE =
 		new SimpleTimeZone(-5 * 60 * 60 * 1000, "America/New_York",
@@ -36,7 +51,7 @@ public class Meals
 	 * Constant array of ints representing the initial balance of the available
 	 * meal plans.
 	 */
-	public static final float[] PLANS = {1900f, 2220f};
+	public static final float[] PLANS = {1900f, 2200f};
 
 	/**
 	 * Prompts the user for their initial and current balance and then displays
@@ -62,6 +77,42 @@ public class Meals
 	}
 
 	/**
+	 * Creates a MealData object with the given values.
+	 * @param startBalance Starting balance to spend.
+	 * @param currentBalance Remaining balance to spend.
+	 * @param endDate Last day to spend funds.
+	 * @return Returns a MealData created.
+	 */
+	public static MealsData createMealsData(float startBalance,
+		float currentBalance, Calendar endDate)
+	{
+		/////////////////////////////////
+		// Calculate time and average. //
+		/////////////////////////////////
+		/* Get number of second till end of semester. */
+		long delta = getTimeTill(endDate);
+		/* Determine number of days. */
+		int days = (int) (delta / (3600 * 24));
+		/* Remaining seconds. */
+		int remainder = (int) (delta % (3600 * 24));
+		 /* Determine number of hours in the eastern time zone. */
+		int hours = ((remainder) / (3600));
+		remainder %= (3600);
+		/* Determine number of mins. */
+		int mins = remainder / 60;
+		/* Determine number of seconds. */
+		int secs = remainder % 60;
+
+		/* Average amount to spend per day including holidays */
+		double average = currentBalance / (double) days;
+
+		/* Construct a MealData. */
+		return new MealsData(startBalance, currentBalance,
+			String.format("%d days, %02dh:%02dm:%02ds", days, hours, mins,
+			secs), average);
+	}
+
+	/**
 	 * Creates a formatted String message that informs the user of the time
 	 * remaining in the semester and the average amount they should spend.
 	 * @param planIndex The index of the initial meal plan balance in the static
@@ -74,6 +125,7 @@ public class Meals
 	 * @throws ArrayIndexOutOfBoundsException Thrown if planIndex does not
 	 * correspond to an available initial meal plan value.
 	 */
+	@Deprecated
 	public static String getMessage(int planIndex, float currentBalance,
 									Calendar endDate) throws
 		ArrayIndexOutOfBoundsException
@@ -101,49 +153,41 @@ public class Meals
 	public static String getMessage(float startBalance, float currentBalance,
 									Calendar endDate)
 	{
-		/////////////////////////////////
-		// Calculate time and average. //
-		/////////////////////////////////
-		/* Get number of second till end of semester. */
-		long delta = getTimeTill(endDate);
-		/* Determine number of days. */
-		int days = (int) (delta / (3600 * 24));
-		/* Remaining seconds. */
-		int remainder = (int) (delta % (3600 * 24));
-		 /* Determine number of hours in the eastern time zone. */
-		int hours = ((remainder) / (3600));
-		remainder %= (3600);
-		/* Determine number of mins. */
-		int mins = remainder / 60;
-		/* Determine number of seconds. */
-		int secs = remainder % 60;
+		/* Get the MealData */
+		MealsData data = createMealsData(startBalance, currentBalance, endDate);
 
-		/* Average amount to spend per day including holidays */
-		double average = currentBalance / (double) days;
+		Calendar today = new GregorianCalendar(EASTERN_TIMEZONE);
+		double weeklyBalance =
+			data.dailyAverage * (today.getActualMaximum(Calendar.DAY_OF_WEEK) -
+				today.get(Calendar.DAY_OF_WEEK) + 1);
+		double monthlyBalance =
+			data.dailyAverage * (today.getActualMaximum(Calendar.DAY_OF_MONTH) -
+				today.get(Calendar.DAY_OF_MONTH) + 1);
 
 		////////////////////////////////
 		// Create the message string. //
 		////////////////////////////////
 		return String.format(
-//				"You started out with $%.2f and have spent $%.2f.\n" +
-//				"That is %.2f%% of your start balance.\n" +
-//				"There are %d days, %d hours, %d mins, and %d " +
-//				"seconds left,\nand you should spend $%.2f on average " +
-//				"per day, including holidays.\n",
 			"Starting balance: $%.2f\n" +
-				"Current balance: $%.2f\n" +
-				"\n" +
-				"Amount spent: $%.2f\n" +
-				"Percentage spent: %.2f%%\n" +
-				"\n" +
-				"Time remaining in the semester:\n" +
-				"\t%d days, %d hours, %d minutes, %d seconds\n" +
-				"\n" +
-				"Recommended spending average per day, including holidays:\n" +
-				"\t$%.2f", startBalance, currentBalance,
-			startBalance - currentBalance,
-			(startBalance - currentBalance) / startBalance * 100, days, hours,
-			mins, secs, (average > 0) ? average : currentBalance);
+			"Current balance: $%.2f\n" +
+			"\n" +
+			"Amount spent: $%.2f\n" +
+			"Percentage spent: %.2f%%\n" +
+			"\n" +
+			"Time remaining in the semester:\n" +
+			"\t%s\n" +
+			"\n" +
+			"Recommended spending average per day, including holidays:\n" +
+			"\t$%.2f\n" +
+			"Amount left to spend this week:\n" +
+			"\t$%.2f\n" +
+			"Amount left to spend this month:\n" +
+			"\t$%.2f",
+			startBalance, currentBalance, startBalance - currentBalance,
+			(startBalance - currentBalance) / startBalance * 100,
+			data.timeRemaining,
+			(data.dailyAverage > 0) ? data.dailyAverage : currentBalance,
+			weeklyBalance, monthlyBalance);
 	}
 
 	/**

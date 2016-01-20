@@ -5,7 +5,10 @@
     <item android:id="@+id/reset_date_action"
           android:title="@string/reset_date_action"
           android:orderInCategory="100"
-          app:showAsAction="never"
+          app:showAsAction="never"/>
 
-        />
+    <item android:id="@+id/about_action"
+          android:title="@string/title_activity_about"
+          android:orderInCategory="101"
+          app:showAsAction="never"/>
 </menu>

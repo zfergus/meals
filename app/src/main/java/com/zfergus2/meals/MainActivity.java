@@ -1,6 +1,7 @@
 package com.zfergus2.meals;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
@@ -21,7 +22,7 @@ import java.util.GregorianCalendar;
  */
 public class MainActivity extends AppCompatActivity
 {
-	public final static String EXTRA_INIT_BALANCE    = "com.zfergus2.meals.INIT";
+	public final static String EXTRA_STARTING_BALANCE    = "com.zfergus2.meals.STARTING";
 	public final static String EXTRA_CURRENT_BALANCE = "com.zfergus2.meals.REMAINING";
 	public final static String EXTRA_END_DATE_DAY    = "com.zfergus2.meals.END_DATE_DAY";
 	public final static String EXTRA_END_DATE_MONTH  = "com.zfergus2.meals.END_DATE_MONTH";
@@ -32,9 +33,14 @@ public class MainActivity extends AppCompatActivity
 	private final static String PREF_END_DATE_DAY = "END_DATE_DAY";
 	private final static String PREF_END_DATE_MONTH = "END_DATE_MONTH";
 	private final static String PREF_END_DATE_YEAR = "END_DATE_YEAR";
+	public final static String PREF_SELECTED_PLAN = "SELECTED_PLAN";
+	public final static String PREF_STARTING_BALANCE = "STARTING_BALANCE";
 
 	private boolean isPlanSelected;
 	private Calendar endDate;
+
+	private Spinner planSpinner;
+	private EditText startingBalance;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -42,7 +48,7 @@ public class MainActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		Spinner spinner = (Spinner) findViewById(R.id.plan_spinner);
+		this.planSpinner = (Spinner) findViewById(R.id.plan_spinner);
 		/* Create an ArrayAdapter using the string array and a default */
 		/* spinner layout.                                             */
 		ArrayAdapter<CharSequence> adapter =
@@ -52,22 +58,23 @@ public class MainActivity extends AppCompatActivity
 		adapter.setDropDownViewResource(
 			android.R.layout.simple_spinner_dropdown_item);
 		/* Apply the adapter to the spinner */
-		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(new MealPlanSelectionListener(this));
+		this.planSpinner.setAdapter(adapter);
+		this.planSpinner.
+			setOnItemSelectedListener(new MealPlanSelectionListener(this));
 
-		/* Handle changes to initBalance. */
-		((EditText)this.findViewById(R.id.init_balance_edit)).
-			addTextChangedListener(new InitialBalanceWatcher(this));
-		this.isPlanSelected = true;
+		/* Handle changes to startingBalance. */
+		this.startingBalance =
+			(EditText)this.findViewById(R.id.starting_balance_edit);
+		this.startingBalance.
+			addTextChangedListener(new StartingBalanceWatcher(this));
 
 		/* Load the end date. */
 		this.loadEndDate();
 
 		/* Set the input box. */
-		((EditText)this.findViewById(R.id.last_day_edit)).setText(
-			CalenderActivity.createFormattedDate(this.endDate));
+		EditText dateText = ((EditText)this.findViewById(R.id.last_day_edit));
+		dateText.setText(CalenderActivity.createFormattedDate(this.endDate));
 
-		EditText dateText = (EditText)this.findViewById(R.id.last_day_edit);
 		dateText.setOnClickListener(new View.OnClickListener()
 		{
 			@Override
@@ -124,6 +131,11 @@ public class MainActivity extends AppCompatActivity
 				CalenderActivity.createFormattedDate(endDate));
 			return true;
 		}
+		else if(id == R.id.about_action)
+		{
+			Intent intent =  new Intent(MainActivity.this, AboutActivity.class);
+			this.startActivity(intent);
+		}
 
 		return super.onOptionsItemSelected(item);
 	}
@@ -135,14 +147,14 @@ public class MainActivity extends AppCompatActivity
 			EditText edit = (EditText) (findViewById(R.id.current_balance_edit));
 			float currentBalance = Float.parseFloat(edit.getText().toString());
 
-			edit = (EditText) (findViewById(R.id.init_balance_edit));
-			float initBalance = Float.parseFloat(edit.getText().toString());
+			float startingBalance =
+				Float.parseFloat(this.startingBalance.getText().toString());
 
 			Intent intent = new Intent(MainActivity.this,
 				DisplayMealsActivity.class);
 
 			intent.putExtra(EXTRA_CURRENT_BALANCE, currentBalance);
-			intent.putExtra(EXTRA_INIT_BALANCE, initBalance);
+			intent.putExtra(EXTRA_STARTING_BALANCE, startingBalance);
 			intent.putExtra(EXTRA_END_DATE_DAY,
 				this.endDate.get(Calendar.DAY_OF_MONTH));
 			intent.putExtra(EXTRA_END_DATE_MONTH,
@@ -155,6 +167,11 @@ public class MainActivity extends AppCompatActivity
 		catch (Exception e)
 		{
 			System.err.println(e.toString());
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Invalid Field Value");
+			builder.setMessage("All fields must have a value.\n");
+			builder.setNeutralButton("Close", null);
+			builder.show();
 		}
 	}
 
@@ -202,6 +219,40 @@ public class MainActivity extends AppCompatActivity
 			this.endDate.get(Calendar.DAY_OF_MONTH));
 		editor.putInt(PREF_END_DATE_MONTH, this.endDate.get(Calendar.MONTH));
 		editor.putInt(PREF_END_DATE_YEAR, this.endDate.get(Calendar.YEAR));
+		editor.apply();
+	}
+
+	/**
+	 * Saves the selected position to SharedPreferences.
+	 */
+	public void savePlanSelection()
+	{
+		SharedPreferences.Editor editor =
+			this.getPreferences(Activity.MODE_PRIVATE).edit();
+		editor.putInt(MainActivity.PREF_SELECTED_PLAN,
+			this.planSpinner.getSelectedItemPosition());
+		editor.apply();
+	}
+
+	/**
+	 * Save the 
+	 */
+	public void saveStartingBalance()
+	{
+		SharedPreferences.Editor editor =
+			this.getPreferences(Activity.MODE_PRIVATE).edit();
+
+		float balance;
+		try
+		{
+			balance = Float.parseFloat(startingBalance.getText().toString());
+		}
+		catch(Exception e)
+		{
+			balance = -1;
+		}
+
+		editor.putFloat(MainActivity.PREF_STARTING_BALANCE, balance);
 		editor.apply();
 	}
 

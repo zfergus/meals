@@ -1,5 +1,7 @@
 package com.zfergus2.meals;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -13,6 +15,8 @@ public class MealPlanSelectionListener
 {
 	private MainActivity meals;
 
+	private boolean isFirstSelection;
+
 	/**
 	 * Creates a MealPlanSelectionListener to listen for changes in meal plans.
 	 * @param meals The main activity of Meals.
@@ -20,6 +24,7 @@ public class MealPlanSelectionListener
 	public MealPlanSelectionListener(MainActivity meals)
 	{
 		this.meals = meals;
+		this.isFirstSelection = true;
 	}
 
 	/**
@@ -33,18 +38,74 @@ public class MealPlanSelectionListener
 	public void onItemSelected(AdapterView<?> parent, View view, int pos,
 							   long id)
 	{
-		float initBalance;
-		EditText initText =
-			(EditText) (this.meals.findViewById(R.id.init_balance_edit));
-
-		if (pos != Spinner.INVALID_POSITION && pos >= 0 &&
-			pos < Meals.PLANS.length)
+		/* The initText value has not been set. */
+		if(this.isFirstSelection)
 		{
-			initBalance = Meals.PLANS[pos];
-			initText.setText("" + initBalance);
+			initializeValues(parent);
+			return;
 		}
 
+		if (pos != Spinner.INVALID_POSITION && pos < Meals.PLANS.length)
+		{
+			setToPlan(pos);
+			this.meals.saveStartingBalance();
+		}
+
+		this.meals.savePlanSelection();
+	}
+
+	/**
+	 * Set the start balance to the one at Meals.PLANS[pos].
+	 * @param pos Index into plans.
+	 */
+	private void setToPlan(int pos)
+	{
+		if (pos < 0 || pos >= Meals.PLANS.length)
+		{
+			return;
+		}
+
+		EditText startingBalanceEdit =
+			(EditText) (this.meals.findViewById(R.id.starting_balance_edit));
+
 		meals.setIsPlanSelected(true);
+		float startingBalance = Meals.PLANS[pos];
+		startingBalanceEdit.setText(String.format("%.2f", startingBalance));
+	}
+
+	/**
+	 * Initialize the values of the Spinner and Starting balance.
+	 * @param parent The spinner.
+	 */
+	private void initializeValues(AdapterView<?> parent)
+	{
+		this.isFirstSelection = false;
+		EditText startingBalanceEdit =
+			(EditText) this.meals.findViewById(R.id.starting_balance_edit);
+
+		SharedPreferences preferences =
+			this.meals.getPreferences(Activity.MODE_PRIVATE);
+
+		int initPlan =
+			preferences.getInt(MainActivity.PREF_SELECTED_PLAN, 0);
+		float startingBalance =
+			preferences.getFloat(MainActivity.PREF_STARTING_BALANCE, -1);
+
+		if(initPlan >= 0 && initPlan < Meals.PLANS.length)
+		{
+			parent.setSelection(initPlan);
+			setToPlan(initPlan);
+		}
+		else if(startingBalance >= 0)
+		{
+			parent.setSelection(parent.getAdapter().getCount()-1);
+			startingBalanceEdit.setText(String.format("%.2f", startingBalance));
+		}
+		else
+		{
+			parent.setSelection(0);
+			setToPlan(0);
+		}
 	}
 
 	/**
@@ -54,8 +115,8 @@ public class MealPlanSelectionListener
 	@Override
 	public void onNothingSelected(AdapterView<?> parent)
 	{
-		EditText initText =
-			(EditText) (this.meals.findViewById(R.id.init_balance_edit));
-		initText.setText("0.0");
+		EditText startingBalanceEdit =
+			(EditText) (this.meals.findViewById(R.id.starting_balance_edit));
+		startingBalanceEdit.setText("0.0");
 	}
 }

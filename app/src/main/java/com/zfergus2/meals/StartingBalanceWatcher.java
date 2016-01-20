@@ -5,18 +5,18 @@ import android.text.TextWatcher;
 import android.widget.Spinner;
 
 /**
- * Changes the Meals plan to optional if initial balance changed.
+ * Changes the Meals plan to optional if starting balance changed.
  */
-public class InitialBalanceWatcher implements TextWatcher
+public class StartingBalanceWatcher implements TextWatcher
 {
 	private MainActivity meals;
 
 	/**
-	 * Creates a InitialBalanceWatcher to watch for changes in the initial
+	 * Creates a StartingBalanceWatcher to watch for changes in the starting
 	 * balance.
 	 * @param meals The main activity of Meals.
 	 */
-	public InitialBalanceWatcher(MainActivity meals)
+	public StartingBalanceWatcher(MainActivity meals)
 	{
 		this.meals = meals;
 	}
@@ -39,9 +39,11 @@ public class InitialBalanceWatcher implements TextWatcher
 	{
 		if(!this.meals.getIsPlanSelected())
 		{
-			Spinner plans =
-				(Spinner) this.meals.findViewById(R.id.plan_spinner);
+			/* Set spinner selection to "other" */
+			Spinner plans = (Spinner)this.meals.findViewById(R.id.plan_spinner);
 			plans.setSelection(plans.getAdapter().getCount() - 1);
+
+			this.meals.saveStartingBalance();
 		}
 		else
 		{

@@ -21,8 +21,8 @@ public class DisplayMealsActivity extends AppCompatActivity
 
         /* Get the message from the intent. */
 		Intent intent = getIntent();
-		float initBalance =
-				intent.getFloatExtra(MainActivity.EXTRA_INIT_BALANCE, 0f);
+		float startingBalance =
+				intent.getFloatExtra(MainActivity.EXTRA_STARTING_BALANCE, 0f);
 		float currentBalance =
 				intent.getFloatExtra(MainActivity.EXTRA_CURRENT_BALANCE, 0f);
 
@@ -37,11 +37,31 @@ public class DisplayMealsActivity extends AppCompatActivity
 		cal.setTimeZone(Meals.EASTERN_TIMEZONE);
 
         /* Calculate the average and create a message. */
-		String message = Meals.getMessage(initBalance, currentBalance, cal);
+		Meals.MealsData data =
+			Meals.createMealsData(startingBalance, currentBalance, cal);
 
         /* Create the text view. */
-		TextView textView = (TextView) (findViewById(R.id.message_view));
-		textView.setText(message);
+		this.setFormattedText(R.id.start_balance_val, data.startBalance);
+		this.setFormattedText(R.id.current_balance_val, data.currentBalance);
+
+		this.setFormattedText(R.id.amount_spent_val,
+			data.startBalance - data.currentBalance);
+		this.setFormattedText(R.id.percent_spent_val,
+			(data.startBalance - data.currentBalance) / data.startBalance * 100);
+
+		((TextView)this.findViewById(R.id.time_remaining_val)).
+			setText(data.timeRemaining);
+
+		this.setFormattedText(R.id.daily_avg_val, data.dailyAverage);
+		Calendar today = new GregorianCalendar(Meals.EASTERN_TIMEZONE);
+		double currentWeeklyBalance = Math.min(data.currentBalance,
+			data.dailyAverage * (today.getActualMaximum(Calendar.DAY_OF_WEEK) -
+				today.get(Calendar.DAY_OF_WEEK) + 1));
+		this.setFormattedText(R.id.weekly_avg_val, currentWeeklyBalance);
+		double currentMonthlyBalance = Math.min(data.currentBalance,
+			data.dailyAverage * (today.getActualMaximum(Calendar.DAY_OF_MONTH) -
+				today.get(Calendar.DAY_OF_MONTH) + 1));
+		this.setFormattedText(R.id.monthly_avg_val, currentMonthlyBalance);
 	}
 
 	@Override
@@ -67,5 +87,18 @@ public class DisplayMealsActivity extends AppCompatActivity
 		}
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	/**
+	 * Set the text of a TextView with id textID to the formated version of its
+	 * current text and the given arguments.
+	 * @param textID ID of the TextView to find.
+	 * @param args Arguments for the TextView's formatting.
+	 * @param <T> Type of argument to be given.
+	 */
+	private <T> void setFormattedText(int textID, T... args)
+	{
+		TextView text = (TextView)this.findViewById(textID);
+		text.setText(String.format(text.getText().toString(), args));
 	}
 }
