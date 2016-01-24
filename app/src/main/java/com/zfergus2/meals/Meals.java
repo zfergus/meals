@@ -4,23 +4,23 @@ import java.util.*;
 
 /**
  * Determines the average amount of money that should be spent every day from
- * now until the end of the Fall 2015 GMU semester. A work in progress, please
- * email me at zfergus2@gmu.edu if you find any bugs. Last updated: 22 September
- * 2015, 05:49:13 EST
+ * now until a specified end date.
  * @author Zachary Ferguson
- * @version 0.1.5
  * @see "http://en.wikipedia.org/wiki/Unix_time"
  */
 public class Meals
 {
+	/**
+	 * Container class for the balances, time period, and daily average.
+	 */
 	public static class MealsData
 	{
 		public float startBalance, currentBalance;
-		public String timeRemaining;
+		public TimePeriod timeRemaining;
 		public double dailyAverage;
 
 		public MealsData(float startBalance, float currentBalance,
-						 String timeRemaining, double dailyAverage)
+						 TimePeriod timeRemaining, double dailyAverage)
 		{
 			this.startBalance = startBalance;
 			this.currentBalance = currentBalance;
@@ -38,7 +38,7 @@ public class Meals
 	/**
 	 * Unix Time for the last time to use Freedom Funds for the semester.
 	 **/
-	public static final Calendar END_DATE = new GregorianCalendar(2016, 04, 15);
+	public static final Calendar END_DATE = new GregorianCalendar(2016, 4, 15);
 	public static final TimeZone EASTERN_TIMEZONE =
 		new SimpleTimeZone(-5 * 60 * 60 * 1000, "America/New_York",
 		Calendar.MARCH, 8, -Calendar.SUNDAY,
@@ -89,27 +89,15 @@ public class Meals
 		/////////////////////////////////
 		// Calculate time and average. //
 		/////////////////////////////////
-		/* Get number of second till end of semester. */
-		long delta = getTimeTill(endDate);
-		/* Determine number of days. */
-		int days = (int) (delta / (3600 * 24));
-		/* Remaining seconds. */
-		int remainder = (int) (delta % (3600 * 24));
-		 /* Determine number of hours in the eastern time zone. */
-		int hours = ((remainder) / (3600));
-		remainder %= (3600);
-		/* Determine number of mins. */
-		int mins = remainder / 60;
-		/* Determine number of seconds. */
-		int secs = remainder % 60;
+		TimePeriod timeTill =
+			new TimePeriod(new GregorianCalendar(EASTERN_TIMEZONE), endDate);
 
 		/* Average amount to spend per day including holidays */
-		double average = currentBalance / (double) days;
+		double dailyAverage = currentBalance /
+			(timeTill.getWeeks() * 7 + timeTill.getDays());
 
 		/* Construct a MealData. */
-		return new MealsData(startBalance, currentBalance,
-			String.format("%d days, %02dh:%02dm:%02ds", days, hours, mins,
-			secs), average);
+		return new MealsData(startBalance,currentBalance,timeTill,dailyAverage);
 	}
 
 	/**
@@ -185,23 +173,8 @@ public class Meals
 			"\t$%.2f",
 			startBalance, currentBalance, startBalance - currentBalance,
 			(startBalance - currentBalance) / startBalance * 100,
-			data.timeRemaining,
+			data.timeRemaining.toString(),
 			(data.dailyAverage > 0) ? data.dailyAverage : currentBalance,
 			weeklyBalance, monthlyBalance);
-	}
-
-	/**
-	 * getDeltaTime Gets the amount of second between now and ENDTIME in unix
-	 * time.
-	 * @return Returns the amount of time, in second, between now and ENDTIME.
-	 */
-	public static long getTimeTill(Calendar endDate)
-	{
-		Calendar currentTime = new GregorianCalendar(EASTERN_TIMEZONE);
-
-		long deltaTime = endDate.getTimeInMillis() -
-			currentTime.getTimeInMillis();
-
-		return deltaTime/1000L;
 	}
 }

@@ -50,7 +50,7 @@ public class DisplayMealsActivity extends AppCompatActivity
 			(data.startBalance - data.currentBalance) / data.startBalance * 100);
 
 		((TextView)this.findViewById(R.id.time_remaining_val)).
-			setText(data.timeRemaining);
+			setText(data.timeRemaining.toString());
 
 		this.setFormattedText(R.id.daily_avg_val, data.dailyAverage);
 		Calendar today = new GregorianCalendar(Meals.EASTERN_TIMEZONE);
