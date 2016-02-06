@@ -168,7 +168,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:textSize="20sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:layout_marginBottom="40sp"/>
 
     <TextView
         android:layout_width="wrap_content"

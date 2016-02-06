@@ -28,17 +28,17 @@ public class TimePeriod
 	{
 		long tmp = TimePeriod.getMillisecondsBetween(startDate, endDate);
 
-		this.milliseconds = (int) tmp % 1000;
-		tmp /= 1000;
-		this.seconds = (int) tmp % 60;
-		tmp /= 60;
-		this.minutes = (int) tmp % 60;
-		tmp /= 60;
-		this.hours   = (int) tmp % 60;
-		tmp /= 24;
-		this.days    = (int) tmp % 7;
-		tmp /= 7;
-		this.weeks   = (int) tmp;
+		this.milliseconds = (int) (tmp % 1000L);
+		tmp /= 1000L;
+		this.seconds = (int)(tmp % 60L);
+		tmp /= 60L;
+		this.minutes = (int)(tmp % 60L);
+		tmp /= 60L;
+		this.hours   = (int)(tmp % 24L);
+		tmp /= 24L;
+		this.days    = (int)(tmp % 7L);
+		tmp /= 7L;
+		this.weeks   = (int)(tmp);
 	}
 
 	/**
