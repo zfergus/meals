@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-<xs:element name="end_date" type="xs:date">
 
-    <end_date>2016-05-15</end_date>
-
-</xs:element>
-</xs:schema>
+<date>
+    <year>2016</year>
+    <month>05</month>
+    <day_of_month>15</day_of_month>
+</date>

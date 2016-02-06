@@ -28,11 +28,11 @@ public class DisplayMealsActivity extends AppCompatActivity
 
 		Calendar cal = new GregorianCalendar(
 			intent.getIntExtra(MainActivity.EXTRA_END_DATE_YEAR,
-				Meals.END_DATE.get(Calendar.YEAR)),
+				MainActivity.defaultEndDate.get(Calendar.YEAR)),
 			intent.getIntExtra(MainActivity.EXTRA_END_DATE_MONTH,
-				Meals.END_DATE.get(Calendar.MONTH)),
+				MainActivity.defaultEndDate.get(Calendar.MONTH)),
 			intent.getIntExtra(MainActivity.EXTRA_END_DATE_DAY,
-				Meals.END_DATE.get(Calendar.DAY_OF_MONTH))
+				MainActivity.defaultEndDate.get(Calendar.DAY_OF_MONTH))
 		);
 		cal.setTimeZone(Meals.EASTERN_TIMEZONE);
 

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,8 +14,18 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * Main activity for Meals. Gets user input for the balance and end date. Sends
@@ -22,11 +33,16 @@ import java.util.GregorianCalendar;
  */
 public class MainActivity extends AppCompatActivity
 {
-	public final static String EXTRA_STARTING_BALANCE    = "com.zfergus2.meals.STARTING";
-	public final static String EXTRA_CURRENT_BALANCE = "com.zfergus2.meals.REMAINING";
-	public final static String EXTRA_END_DATE_DAY    = "com.zfergus2.meals.END_DATE_DAY";
-	public final static String EXTRA_END_DATE_MONTH  = "com.zfergus2.meals.END_DATE_MONTH";
-	public final static String EXTRA_END_DATE_YEAR   = "com.zfergus2.meals.END_DATE_YEAR";
+	public final static String EXTRA_STARTING_BALANCE =
+		"com.zfergus2.meals.STARTING";
+	public final static String EXTRA_CURRENT_BALANCE =
+		"com.zfergus2.meals.REMAINING";
+	public final static String EXTRA_END_DATE_DAY =
+		"com.zfergus2.meals.END_DATE_DAY";
+	public final static String EXTRA_END_DATE_MONTH =
+		"com.zfergus2.meals.END_DATE_MONTH";
+	public final static String EXTRA_END_DATE_YEAR =
+		"com.zfergus2.meals.END_DATE_YEAR";
 
 	private final static int REQUEST_CALENDAR = 0xCAFE;
 
@@ -42,6 +58,10 @@ public class MainActivity extends AppCompatActivity
 	private Spinner planSpinner;
 	private EditText startingBalance;
 
+	private static final String xmlEndDateURL =
+		"http://zfergus.me/com.zfergus2.Meals.default_end_date.xml";
+	public static Calendar defaultEndDate;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -51,10 +71,9 @@ public class MainActivity extends AppCompatActivity
 		this.planSpinner = (Spinner) findViewById(R.id.plan_spinner);
 		/* Create an ArrayAdapter using the string array and a default */
 		/* spinner layout.                                             */
-		ArrayAdapter<CharSequence> adapter =
-				ArrayAdapter.createFromResource(this,
-						R.array.plans_array,
-						android.R.layout.simple_spinner_item);
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter
+			.createFromResource(this, R.array.plans_array,
+				android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(
 			android.R.layout.simple_spinner_dropdown_item);
 		/* Apply the adapter to the spinner */
@@ -64,7 +83,7 @@ public class MainActivity extends AppCompatActivity
 
 		/* Handle changes to startingBalance. */
 		this.startingBalance =
-			(EditText)this.findViewById(R.id.starting_balance_edit);
+			(EditText) this.findViewById(R.id.starting_balance_edit);
 		this.startingBalance.
 			addTextChangedListener(new StartingBalanceWatcher(this));
 
@@ -72,7 +91,7 @@ public class MainActivity extends AppCompatActivity
 		this.loadEndDate();
 
 		/* Set the input box. */
-		EditText dateText = ((EditText)this.findViewById(R.id.last_day_edit));
+		EditText dateText = ((EditText) this.findViewById(R.id.last_day_edit));
 		dateText.setText(CalenderActivity.createFormattedDate(this.endDate));
 
 		dateText.setOnClickListener(new View.OnClickListener()
@@ -94,6 +113,27 @@ public class MainActivity extends AppCompatActivity
 				}
 			}
 		});
+
+		/* Set the default end date. */
+		try
+		{
+			InputStream stream = MainActivity.requestXMLEndDate();
+			DateXMLParser dateXMLParser = new DateXMLParser(stream);
+
+			if(dateXMLParser.getParsedDate() == null)
+			{
+				throw new Exception("Invalid date parsed from XML.");
+			}
+			else
+			{
+				MainActivity.defaultEndDate = Meals.END_DATE;
+			}
+		}
+		catch(Exception e)
+		{
+			System.err.println(e.toString());
+			MainActivity.defaultEndDate = Meals.END_DATE;
+		}
 	}
 
 	public void setIsPlanSelected(boolean isPlanSelected)
@@ -123,17 +163,17 @@ public class MainActivity extends AppCompatActivity
 		int id = item.getItemId();
 
 		//noinspection SimplifiableIfStatement
-		if (id == R.id.reset_date_action)
+		if(id == R.id.reset_date_action)
 		{
-			endDate = Meals.END_DATE;
+			endDate = this.defaultEndDate;
 			saveEndDate();
-			((EditText)findViewById(R.id.last_day_edit)).setText(
-				CalenderActivity.createFormattedDate(endDate));
+			((EditText) findViewById(R.id.last_day_edit))
+				.setText(CalenderActivity.createFormattedDate(endDate));
 			return true;
 		}
 		else if(id == R.id.about_action)
 		{
-			Intent intent =  new Intent(MainActivity.this, AboutActivity.class);
+			Intent intent = new Intent(MainActivity.this, AboutActivity.class);
 			this.startActivity(intent);
 		}
 
@@ -150,8 +190,7 @@ public class MainActivity extends AppCompatActivity
 			float startingBalance =
 				Float.parseFloat(this.startingBalance.getText().toString());
 
-			Intent intent = new Intent(MainActivity.this,
-				DisplayMealsActivity.class);
+			Intent intent = new Intent(MainActivity.this, DisplayMealsActivity.class);
 
 			intent.putExtra(EXTRA_CURRENT_BALANCE, currentBalance);
 			intent.putExtra(EXTRA_STARTING_BALANCE, startingBalance);
@@ -159,12 +198,12 @@ public class MainActivity extends AppCompatActivity
 				this.endDate.get(Calendar.DAY_OF_MONTH));
 			intent.putExtra(EXTRA_END_DATE_MONTH,
 				this.endDate.get(Calendar.MONTH));
-			intent.putExtra(EXTRA_END_DATE_YEAR,
-				this.endDate.get(Calendar.YEAR));
+			intent
+				.putExtra(EXTRA_END_DATE_YEAR, this.endDate.get(Calendar.YEAR));
 
 			startActivity(intent);
 		}
-		catch (Exception e)
+		catch(Exception e)
 		{
 			System.err.println(e.toString());
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -179,9 +218,7 @@ public class MainActivity extends AppCompatActivity
 	{
 		Intent intent = new Intent(MainActivity.this, CalenderActivity.class);
 
-		intent.putExtra(
-			EXTRA_END_DATE_DAY, this.endDate.get(Calendar.DAY_OF_MONTH)
-		);
+		intent.putExtra(EXTRA_END_DATE_DAY, this.endDate.get(Calendar.DAY_OF_MONTH));
 		intent.putExtra(EXTRA_END_DATE_MONTH, this.endDate.get(Calendar.MONTH));
 		intent.putExtra(EXTRA_END_DATE_YEAR, this.endDate.get(Calendar.YEAR));
 
@@ -201,13 +238,12 @@ public class MainActivity extends AppCompatActivity
 				data.getIntExtra(CalenderActivity.EXTRA_END_DATE_MONTH,
 					Meals.END_DATE.get(Calendar.MONTH)),
 				data.getIntExtra(CalenderActivity.EXTRA_END_DATE_DAY,
-					Meals.END_DATE.get(Calendar.DAY_OF_MONTH))
-			);
+					Meals.END_DATE.get(Calendar.DAY_OF_MONTH)));
 
 			this.saveEndDate();
 
-			((EditText)findViewById(R.id.last_day_edit)).setText(
-				CalenderActivity.createFormattedDate(endDate));
+			((EditText) findViewById(R.id.last_day_edit))
+				.setText(CalenderActivity.createFormattedDate(endDate));
 		}
 
 	}
@@ -215,8 +251,8 @@ public class MainActivity extends AppCompatActivity
 	private void saveEndDate()
 	{
 		SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-		editor.putInt(PREF_END_DATE_DAY,
-			this.endDate.get(Calendar.DAY_OF_MONTH));
+		editor
+			.putInt(PREF_END_DATE_DAY, this.endDate.get(Calendar.DAY_OF_MONTH));
 		editor.putInt(PREF_END_DATE_MONTH, this.endDate.get(Calendar.MONTH));
 		editor.putInt(PREF_END_DATE_YEAR, this.endDate.get(Calendar.YEAR));
 		editor.apply();
@@ -235,7 +271,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	/**
-	 * Save the 
+	 * Save the
 	 */
 	public void saveStartingBalance()
 	{
@@ -261,15 +297,18 @@ public class MainActivity extends AppCompatActivity
 		SharedPreferences preferences = getPreferences(MODE_PRIVATE);
 
 		/* Retrieve stored or default end date. */
-		int day = preferences.getInt(
-			PREF_END_DATE_DAY, Meals.END_DATE.get(Calendar.DAY_OF_MONTH)
-		);
-		int month = preferences.getInt(
-			PREF_END_DATE_MONTH, Meals.END_DATE.get(Calendar.MONTH)
-		);
-		int year = preferences.getInt(PREF_END_DATE_YEAR,
-			Meals.END_DATE.get(Calendar.YEAR));
+		int day = preferences.getInt(PREF_END_DATE_DAY, Meals.END_DATE.get(Calendar.DAY_OF_MONTH));
+		int month = preferences
+			.getInt(PREF_END_DATE_MONTH, Meals.END_DATE.get(Calendar.MONTH));
+		int year = preferences
+			.getInt(PREF_END_DATE_YEAR, Meals.END_DATE.get(Calendar.YEAR));
 
 		this.endDate = new GregorianCalendar(year, month, day);
+	}
+
+	private static InputStream requestXMLEndDate() throws Exception
+	{
+		URL url = new URL(MainActivity.xmlEndDateURL);
+		return url.openStream();
 	}
 }
