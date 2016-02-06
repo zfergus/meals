@@ -10,9 +10,16 @@ import android.widget.TextView;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+/**
+ * Display the Meals message.
+ * @author Zachary Ferguson
+ */
 public class DisplayMealsActivity extends AppCompatActivity
 {
-
+	/**
+	 * On the creation of this activity. Load values and display the message.
+	 * @param savedInstanceState Passed to super.
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -64,6 +71,11 @@ public class DisplayMealsActivity extends AppCompatActivity
 		this.setFormattedText(R.id.monthly_avg_val, currentMonthlyBalance);
 	}
 
+	/**
+	 * Inflate the menu to fit the screen.
+	 * @param menu Menu to be created.
+	 * @return Returns true.
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
@@ -72,6 +84,11 @@ public class DisplayMealsActivity extends AppCompatActivity
 		return true;
 	}
 
+	/**
+	 * Ignore all Options selections.
+	 * @param item Selected item.
+	 * @return Returns if item was used.
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{

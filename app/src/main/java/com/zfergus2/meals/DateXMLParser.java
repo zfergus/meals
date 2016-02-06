@@ -24,7 +24,7 @@ public class DateXMLParser
 	/**
 	 * Namespace of the xml.
 	 */
-	private static String ns = null;
+	private String ns = null;
 
 	/**
 	 * Access the date read from the XML.
@@ -50,7 +50,7 @@ public class DateXMLParser
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
 			parser.setInput(in, null);
 			parser.nextTag();
-			this.parsedDate = parseDate(parser);
+			this.parsedDate = this.readDate(parser);
 		}
 		catch(Exception e)
 		{
@@ -64,45 +64,13 @@ public class DateXMLParser
 	}
 
 	/**
-	 * Parses the XML to extract the first date object.
-	 * @param parser XML to parse.
-	 * @return Returns a Calendar object of the date parsed.
-	 * @throws XmlPullParserException If parsing goes wrong.
-	 * @throws IOException If stream inaccessible.
-	 */
-	private static Calendar parseDate(XmlPullParser parser)
-		throws XmlPullParserException, IOException
-	{
-		while (parser.next() != XmlPullParser.END_TAG)
-		{
-			if (parser.getEventType() != XmlPullParser.START_TAG)
-			{
-				continue;
-			}
-			String name = parser.getName();
-
-			// Starts by looking for the entry tag
-			if (name.equals("date"))
-			{
-				return readDate(parser);
-			}
-			else
-			{
-				skip(parser);
-			}
-		}
-
-		throw new IOException("Unable to find date tag in the given XML.");
-	}
-
-	/**
 	 * Reads the date between the current "date" tag.
 	 * @param parser XML to read the date from.
 	 * @return Returns a Calendar object of the date read.
 	 * @throws XmlPullParserException If parsing goes wrong.
 	 * @throws IOException If stream inaccessible.
 	 */
-	private static Calendar readDate(XmlPullParser parser)
+	private Calendar readDate(XmlPullParser parser)
 		throws XmlPullParserException, IOException
 	{
 		parser.require(XmlPullParser.START_TAG, ns, "date");
@@ -120,26 +88,26 @@ public class DateXMLParser
 			{
 				//parse year
 				parser.require(XmlPullParser.START_TAG, ns, "year");
-				year = Integer.parseInt(readText(parser));
+				year = Integer.parseInt(this.readText(parser));
 				parser.require(XmlPullParser.END_TAG, ns, "year");
 			}
 			else if(name.equals("month"))
 			{
 				//parse month
 				parser.require(XmlPullParser.START_TAG, ns, "month");
-				month = Integer.parseInt(readText(parser));
+				month = Integer.parseInt(this.readText(parser))-1;
 				parser.require(XmlPullParser.END_TAG, ns, "month");
 			}
 			else if(name.equals("day_of_month"))
 			{
 				//parse day of month
 				parser.require(XmlPullParser.START_TAG, ns, "day_of_month");
-				day_of_month = Integer.parseInt(readText(parser));
+				day_of_month = Integer.parseInt(this.readText(parser));
 				parser.require(XmlPullParser.END_TAG, ns, "day_of_month");
 			}
 			else
 			{
-				skip(parser);
+				this.skipTag(parser);
 			}
 		}
 
@@ -158,7 +126,7 @@ public class DateXMLParser
 	 * @throws XmlPullParserException If parsing goes wrong.
 	 * @throws IOException If stream inaccessible.
 	 */
-	private static String readText(XmlPullParser parser)
+	private String readText(XmlPullParser parser)
 		throws  XmlPullParserException, IOException
 	{
 		String result = "";
@@ -176,7 +144,7 @@ public class DateXMLParser
 	 * @throws XmlPullParserException If parsing goes wrong.
 	 * @throws IOException If stream inaccessible.
 	 */
-	private static void skip(XmlPullParser parser)
+	private void skipTag(XmlPullParser parser)
 		throws XmlPullParserException, IOException
 	{
 		if (parser.getEventType() != XmlPullParser.START_TAG)

@@ -15,6 +15,7 @@ import java.util.Locale;
 
 /**
  * Activity for displaying a calender and getting a date.
+ * @author Zachary Ferguson
  */
 public class CalenderActivity extends AppCompatActivity
 	implements CalendarView.OnDateChangeListener
@@ -56,6 +57,9 @@ public class CalenderActivity extends AppCompatActivity
 		this.formattedDate.setText(createFormattedDate(this.selectedDate));
 	}
 
+	/**
+	 * On the activity start, after the creation.
+	 */
 	@Override
 	protected void onStart ()
 	{
