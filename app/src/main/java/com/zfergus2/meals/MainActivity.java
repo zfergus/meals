@@ -109,6 +109,13 @@ public class MainActivity extends AppCompatActivity
 		this.startingBalance.
 			addTextChangedListener(new StartingBalanceWatcher(this));
 
+		/* Set the default end date. */
+		MainActivity.defaultEndDate = Meals.END_DATE;
+		(new DownloadXmlTask()).execute(MainActivity.END_DATE_URL);
+
+		/* Load the selected end date from shared preferences. */
+		this.loadEndDate();
+
 		/* Set the input box. */
 		EditText dateText = ((EditText) this.findViewById(R.id.last_day_edit));
 		dateText.setText(CalenderActivity.createFormattedDate(this.endDate));
@@ -132,13 +139,6 @@ public class MainActivity extends AppCompatActivity
 				}
 			}
 		});
-
-		/* Set the default end date. */
-		MainActivity.defaultEndDate = Meals.END_DATE;
-		(new DownloadXmlTask()).execute(MainActivity.END_DATE_URL);
-
-		/* Load the selected end date from shared preferences. */
-		this.loadEndDate();
 	}
 
 	/**
