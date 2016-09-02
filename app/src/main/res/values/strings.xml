@@ -48,20 +48,20 @@
     <string name="about_text">
        <![CDATA[
         <h3>About:</h3>
-        Meals is an useful and simple meal budgeting tool. After providing a
+        Meals is an useful yet simple meal budgeting tool. After providing a
         starting and current balance, and a end date for the budget period,
         Meals determine a daily allowance. If you spend the recommended amount
-        per day you will be able to spend all of your budget.
-        <br/>
-        Meals also provides an estimate for the remaining fund this week and
-        month. Allowing you to easily purchase food for a longer period without
-        the worry of going over budget.
-        <br/>
+        per day you will be able to spend all of your budget. Also provided is
+        an estimate for the remaining fund this week and month. Allowing you to
+        easily purchase food for a longer period without the worry of going
+        over budget.<br/>
         <h3>Credits:</h3>
         Created by Zachary Ferguson
         (<a href = "http://zfergus.me">zfergus.me</a>)<br/>
         Comments/Suggestions:
-        <a href="mailto:zfergus@gmu.edu?Subject=Meals%20App">zfergus2@gmu.edu</a>
+        <a href="mailto:zy.fergus@gmail.com?Subject=Meals%20App">
+            zy.fergus@gmail.com
+        </a>
         ]]>
     </string>
 </resources>
