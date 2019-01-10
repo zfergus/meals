@@ -1,6 +1,8 @@
 # Meals
 
-<img src="./graphics/feature/meals-feature.png" width="100%">
+<p align="center">
+  <img src="preview.png" width="100%">
+</p>
 
 **Android app for budgeting meals.**
 
